@@ -1,0 +1,6 @@
+{
+  "name": "CityPulse AI",
+  "description": "AI-driven citizen reporting dashboard with automated routing and PDF report card exports.",
+  "requestFramePermissions": ["camera", "geolocation"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

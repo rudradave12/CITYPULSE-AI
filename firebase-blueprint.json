@@ -1,0 +1,106 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "User profile containing role permissions and credentials",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "description": "The unique user authentication ID" },
+        "displayName": { "type": "string", "description": "Human displays name of the user" },
+        "email": { "type": "string", "description": "User email address" },
+        "role": { "type": "string", "enum": ["citizen", "officer", "admin"], "description": "Role determining administrative dashboard access" },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Timestamp when the user account was initialized" }
+      },
+      "required": ["uid", "email", "role"]
+    },
+    "Issue": {
+      "title": "Issue",
+      "description": "An urban issue reported by a citizen, analyzed by Gemini AI",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Unique identifiers for compliance tracking" },
+        "reporterId": { "type": "string", "description": "References the reporting client User profile" },
+        "reporterName": { "type": "string", "description": "The name of original poster" },
+        "photoUrl": { "type": "string", "description": "Base64 data or storage reference of the uploaded photo" },
+        "latitude": { "type": "number", "description": "Location GPS coordinate latitude" },
+        "longitude": { "type": "number", "description": "Location GPS coordinate longitude" },
+        "locationName": { "type": "string", "description": "Human readable address or region label" },
+        "description": { "type": "string", "description": "User text input description" },
+        "category": { "type": "string", "enum": ["Pothole", "Garbage", "Water Leakage", "Broken Streetlight", "Open Manhole", "Road Damage", "Traffic Signal Issue"], "description": "Detected category from Gemini Vision" },
+        "confidenceScore": { "type": "number", "description": "AI categorization confidence level" },
+        "severity": { "type": "string", "enum": ["Low", "Medium", "High", "Critical"], "description": "Classified state based on safety guidelines" },
+        "severityScore": { "type": "number", "description": "Scaled risk severity score" },
+        "assignedDepartment": { "type": "string", "enum": ["Road Department", "Water Department", "Electrical Department", "Sanitation Department", "Municipal Office"], "description": "The municipal group directed to handle the case" },
+        "complaintText": { "type": "string", "description": "Professional AI-generated formal report structure" },
+        "suggestedAction": { "type": "string", "description": "Action recommendations provided by Gemini AI" },
+        "status": { "type": "string", "enum": ["Pending", "In Progress", "Resolved", "Critical"], "description": "Current lifecycle state of the resolution" },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Submission timestamp" },
+        "updatedAt": { "type": "string", "format": "date-time", "description": "Last modification timestamp" },
+        "resolutionNotes": { "type": "string", "description": "Input comments provided during resolution update" },
+        "resolutionDate": { "type": "string", "format": "date-time", "description": "Timestamp when status transitioned to Resolved" }
+      },
+      "required": ["id", "reporterId", "photoUrl", "category", "severity", "assignedDepartment", "status", "createdAt"]
+    },
+    "Department": {
+      "title": "Department",
+      "description": "A municipal department responsible for handling category issues",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Department code identity" },
+        "name": { "type": "string", "description": "Human-readable administration title" },
+        "head": { "type": "string", "description": "Department director or representative" },
+        "email": { "type": "string", "description": "Department alert mailbox email address" },
+        "issueCount": { "type": "number", "description": "Total assigned incident counts" },
+        "resolvedCount": { "type": "number", "description": "Successful case close numbers" }
+      },
+      "required": ["id", "name", "issueCount", "resolvedCount"]
+    },
+    "Report": {
+      "title": "Report",
+      "description": "Log records generated upon issue updates or formal downloads",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Log identification key" },
+        "issueId": { "type": "string", "description": "Reference ticket ID match" },
+        "type": { "type": "string", "description": "Incident type or update action category" },
+        "description": { "type": "string", "description": "System state audit text" },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Log event timestamp" }
+      },
+      "required": ["id", "issueId", "type", "createdAt"]
+    },
+    "Analytics": {
+      "title": "Analytics",
+      "description": "Consolidated state metrics tracking for the dashboard display panels",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Aggregate stat identifier key" },
+        "title": { "type": "string", "description": "Display label for dashboard charts" },
+        "value": { "type": "number", "description": "Consolidated numerical weight counters" },
+        "updatedAt": { "type": "string", "format": "date-time", "description": "Stat compilation checkpoint" }
+      },
+      "required": ["id", "value", "updatedAt"]
+    }
+  },
+  "firestore": {
+    "users/{userId}": {
+      "schema": "User",
+      "description": "Stores user demographic registration roles"
+    },
+    "issues/{issueId}": {
+      "schema": "Issue",
+      "description": "Primary issue registry tracking civic reports"
+    },
+    "departments/{departmentId}": {
+      "schema": "Department",
+      "description": "Directory of functional groups with metadata statistics"
+    },
+    "reports/{reportId}": {
+      "schema": "Report",
+      "description": "Registry of audit history transitions"
+    },
+    "analytics/{analyticId}": {
+      "schema": "Analytics",
+      "description": "Metric aggregates cached for instant analytics loads"
+    }
+  }
+}

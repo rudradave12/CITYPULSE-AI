@@ -1,0 +1,132 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // 1. Global Catch-All Safety Net (Default Deny)
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // --- REUSABLE SECURITY PRIMITIVES ---
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    // Fetches the user role from their database document
+    function getUserRole() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role;
+    }
+
+    function isOfficerOrAdmin() {
+      return isSignedIn() && (getUserRole() == 'officer' || getUserRole() == 'admin');
+    }
+
+    function isAdmin() {
+      return isSignedIn() && getUserRole() == 'admin';
+    }
+
+    // --- COLLECTION RULES ---
+
+    // 2. Users Collection
+    match /users/{userId} {
+      allow get: if isSignedIn() && (isOwner(userId) || getUserRole() in ['officer', 'admin']);
+      allow list: if isSignedIn() && getUserRole() in ['officer', 'admin'];
+      
+      allow create: if isSignedIn() 
+                    && isOwner(userId)
+                    && isValidId(userId)
+                    && incoming().keys().hasAll(['uid', 'email', 'role', 'createdAt'])
+                    && incoming().uid == request.auth.uid
+                    && incoming().role == 'citizen' // Citizens cannot initialize themselves as admin or officer
+                    && incoming().email == request.auth.token.email;
+
+      allow update: if isSignedIn() 
+                    && isOwner(userId)
+                    && incoming().uid == existing().uid
+                    && incoming().role == existing().role // Forbid self-role escalation
+                    && incoming().diff(existing()).affectedKeys().hasOnly(['displayName', 'email']);
+    }
+
+    // 3. Issues Collection
+    match /issues/{issueId} {
+      allow get: if isSignedIn();
+      allow list: if isSignedIn(); // Public civic index
+
+      allow create: if isSignedIn()
+                    && isValidId(issueId)
+                    && incoming().keys().hasAll(['id', 'reporterId', 'photoUrl', 'category', 'severity', 'assignedDepartment', 'status', 'createdAt'])
+                    && incoming().id == issueId
+                    && incoming().reporterId == request.auth.uid // Block reporter spoofing
+                    && incoming().status == 'Pending' // Issues must start as Pending
+                    && incoming().createdAt == request.time // Enforce server timestamp
+                    && incoming().photoUrl is string
+                    && incoming().photoUrl.size() > 0
+                    && incoming().latitude is number
+                    && incoming().latitude >= -90.0 && incoming().latitude <= 90.0
+                    && incoming().longitude is number
+                    && incoming().longitude >= -180.0 && incoming().longitude <= 180.0;
+
+      allow update: if isSignedIn() 
+                    && (
+                      // Action A: Administrator/Officer resolving/updating issues
+                      (isOfficerOrAdmin() && (
+                        // Force validation helper constraint
+                        incoming().reporterId == existing().reporterId &&
+                        incoming().createdAt == existing().createdAt &&
+                        (incoming().status != 'Resolved' || incoming().resolutionDate == request.time)
+                      )) ||
+                      // Action B: Original citizen adding descriptions, but cannot change AI parameters, status, or department
+                      (isOwner(existing().reporterId) && 
+                       incoming().reporterId == existing().reporterId &&
+                       incoming().status == existing().status &&
+                       incoming().category == existing().category &&
+                       incoming().severity == existing().severity &&
+                       incoming().assignedDepartment == existing().assignedDepartment &&
+                       incoming().photoUrl == existing().photoUrl &&
+                       incoming().diff(existing()).affectedKeys().hasOnly(['description', 'locationName']))
+                    );
+
+      allow delete: if isAdmin();
+    }
+
+    // 4. Departments Collection
+    match /departments/{departmentId} {
+      allow read: if isSignedIn();
+      allow write: if isAdmin(); // Strictly admin managed
+    }
+
+    // 5. Reports (Audit History Logs)
+    match /reports/{reportId} {
+      allow read: if isSignedIn() && getUserRole() in ['officer', 'admin'];
+      allow create: if isSignedIn() 
+                    && isValidId(reportId)
+                    && incoming().keys().hasAll(['id', 'issueId', 'type', 'createdAt'])
+                    && incoming().createdAt == request.time;
+      allow update, delete: if false; // Audit logs are immutable
+    }
+
+    // 6. Analytics Collection
+    match /analytics/{analyticId} {
+      allow read: if isSignedIn();
+      // Only admins or officers can modify statistics, such as triggering resolved count increments
+      allow write: if isOfficerOrAdmin();
+    }
+  }
+}

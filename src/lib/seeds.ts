@@ -1,0 +1,172 @@
+import { IssueTicket, DepartmentInfo, StatMetric } from "../types";
+
+// Base coordinates for "Metro Center" (centered in San Francisco styled layout)
+export const CITY_CENTER = { lat: 37.7749, lng: -122.4194 };
+
+// Visual static image maps representing different issue types (utilizing robust Unsplash asset references carefully chosen for absolute realism and styling)
+export const MOCK_IMAGES = {
+  Pothole: "https://images.unsplash.com/photo-1515162305285-0293e4767cc2?auto=format&fit=crop&q=80&w=600",
+  Garbage: "https://images.unsplash.com/photo-1611284446314-60a58ac0deb9?auto=format&fit=crop&q=80&w=600",
+  "Water Leakage": "https://images.unsplash.com/photo-1542044896530-05d85be9b11a?auto=format&fit=crop&q=80&w=600",
+  "Broken Streetlight": "https://images.unsplash.com/photo-1517462964-21fdcec3f25b?auto=format&fit=crop&q=80&w=600",
+  "Open Manhole": "https://images.unsplash.com/photo-1584467541268-b040f83be3fd?auto=format&fit=crop&q=80&w=600",
+  "Road Damage": "https://images.unsplash.com/photo-1515162305285-0293e4767cc2?auto=format&fit=crop&q=80&w=600",
+  "Traffic Signal Issue": "https://images.unsplash.com/photo-1508962914676-134849a727f0?auto=format&fit=crop&q=80&w=600",
+};
+
+export const INITIAL_DEPARTMENTS: DepartmentInfo[] = [
+  {
+    id: "dept_road",
+    name: "Road Department",
+    head: "Irina Petrova",
+    email: "roads@municipal.gov",
+    issueCount: 14,
+    resolvedCount: 9,
+  },
+  {
+    id: "dept_water",
+    name: "Water Department",
+    head: "Arthur Curry",
+    email: "water.supply@municipal.gov",
+    issueCount: 8,
+    resolvedCount: 5,
+  },
+  {
+    id: "dept_electric",
+    name: "Electrical Department",
+    head: "Nikola Tesla",
+    email: "grid@municipal.gov",
+    issueCount: 6,
+    resolvedCount: 4,
+  },
+  {
+    id: "dept_sanitation",
+    name: "Sanitation Department",
+    head: "Clara G.",
+    email: "waste@municipal.gov",
+    issueCount: 22,
+    resolvedCount: 18,
+  },
+  {
+    id: "dept_office",
+    name: "Municipal Office",
+    head: "Marcus Aurelius",
+    email: "mayor.assist@municipal.gov",
+    issueCount: 5,
+    resolvedCount: 3,
+  },
+];
+
+export const INITIAL_ANALYTICS: StatMetric[] = [
+  { id: "stat_resolved", title: "Issues Resolved", value: 39, updatedAt: new Date().toISOString() },
+  { id: "stat_water", title: "Water Saved (kL)", value: 1250, updatedAt: new Date().toISOString() },
+  { id: "stat_waste", title: "Waste Removed (tons)", value: 8.4, updatedAt: new Date().toISOString() },
+  { id: "stat_repairs", title: "Road Repairs Accomplished", value: 9, updatedAt: new Date().toISOString() },
+  { id: "stat_participation", title: "Citizen Participation %", value: 92, updatedAt: new Date().toISOString() },
+  { id: "stat_impact", title: "Urban Impact Score", value: 88, updatedAt: new Date().toISOString() },
+];
+
+export const INITIAL_ISSUES: IssueTicket[] = [
+  {
+    id: "issue_001",
+    reporterId: "demo_citizen_007",
+    reporterName: "Alex Vance",
+    photoUrl: MOCK_IMAGES["Pothole"],
+    latitude: 37.7833,
+    longitude: -122.4167,
+    locationName: "842 Market St, San Francisco, CA",
+    description: "Deep pothole right after the pedestrian crosswalk. It creates heavy steering shocks for cyclists and cars.",
+    category: "Pothole",
+    confidenceScore: 0.96,
+    severity: "High",
+    severityScore: 84,
+    assignedDepartment: "Road Department",
+    complaintText: `CITYPULSE AUTOMATED COMPLAINT\n===================================\nTICKET CODE: issue_001\nCLASS: Pothole\nROUTE TO: Road Department\n\nEXECUTIVE ADVISORY:\nAn extreme deep-set asphalt fault detected at 842 Market St. Visual metrics confirm structural integrity failure. The hazard is positioned directly adjacent to major pedestrian routing. There is an immediate risk of cyclist wheel locking, steering alignment loss, and vehicle damage.\n\nRECOMMENDED RESPONSE SCHEDULE: Within 24 Hours.`,
+    suggestedAction: "Position safety cones immediately on market road limits. Fast-track gravel fill patching.",
+    status: "Critical",
+    createdAt: new Date(Date.now() - 3.2 * 24 * 60 * 60 * 1000).toISOString(), // 3 days ago
+    updatedAt: new Date(Date.now() - 3.2 * 24 * 60 * 60 * 1000).toISOString(),
+  },
+  {
+    id: "issue_002",
+    reporterId: "demo_citizen_007",
+    reporterName: "Alex Vance",
+    photoUrl: MOCK_IMAGES["Water Leakage"],
+    latitude: 37.7699,
+    longitude: -122.4468,
+    locationName: "1722 Haight St, San Francisco, CA",
+    description: "Clean water is bursting out of a pavement fracture. Large volume leakage flowing down to the local drainage.",
+    category: "Water Leakage",
+    confidenceScore: 0.94,
+    severity: "High",
+    severityScore: 78,
+    assignedDepartment: "Water Department",
+    complaintText: `CITYPULSE AUTOMATED COMPLAINT\n===================================\nTICKET CODE: issue_002\nCLASS: Water Leakage\nROUTE TO: Water Department\n\nEXECUTIVE ADVISORY:\nPressurized potable water escape from a primary sub-surface main fracture. Estimated discharge is 45 liters per minute. Significant soil erosion and localized pavement slippage risks identified. Requires hydromechanical isolation.\n\nRECOMMENDED RESPONSE SCHEDULE: Urgent, under 12 hours.`,
+    suggestedAction: "De-energize sector control valve 4C. Dispatch municipal pipeline excavation grid.",
+    status: "In Progress",
+    createdAt: new Date(Date.now() - 1.5 * 24 * 60 * 60 * 1000).toISOString(), // 1.5 days ago
+    updatedAt: new Date(Date.now() - 0.5 * 24 * 60 * 60 * 1000).toISOString(),
+  },
+  {
+    id: "issue_003",
+    reporterId: "citizen_999",
+    reporterName: "Sarah Connor",
+    photoUrl: MOCK_IMAGES["Garbage"],
+    latitude: 37.7512,
+    longitude: -122.4121,
+    locationName: "Mission Dolores Park, Dolores St, CA",
+    description: "Illegal commercial waste dump behind the kids slides. Several plastic crates and garbage bags piling up.",
+    category: "Garbage",
+    confidenceScore: 0.98,
+    severity: "Medium",
+    severityScore: 48,
+    assignedDepartment: "Sanitation Department",
+    complaintText: `CITYPULSE AUTOMATED COMPLAINT\n===================================\nTICKET CODE: issue_003\nCLASS: Garbage\nROUTE TO: Sanitation Department\n\nEXECUTIVE ADVISORY:\nCommercial and industrial plastic waste piled on recreational green space. Biohazard risk from pest attraction. Prompts immediate civic sanitation cleanups.\n\nRECOMMENDED RESPONSE SCHEDULE: Within 48 hours.`,
+    suggestedAction: "Dispatch sanitation dumpster dispatch 12. Alert environmental code reinforcement units.",
+    status: "Pending",
+    createdAt: new Date(Date.now() - 0.4 * 24 * 60 * 60 * 1000).toISOString(), // 10 hours ago
+    updatedAt: new Date(Date.now() - 0.4 * 24 * 60 * 60 * 1000).toISOString(),
+  },
+  {
+    id: "issue_004",
+    reporterId: "citizen_412",
+    reporterName: "James Carter",
+    photoUrl: MOCK_IMAGES["Broken Streetlight"],
+    latitude: 37.7944,
+    longitude: -122.3997,
+    locationName: "Embarcadero Crossing Walkway, CA",
+    description: "Triple lighting pole is completely dark tonight. Creating safety concerns for pedestrians walking near the bay side.",
+    category: "Broken Streetlight",
+    confidenceScore: 0.89,
+    severity: "Medium",
+    severityScore: 55,
+    assignedDepartment: "Electrical Department",
+    complaintText: `CITYPULSE AUTOMATED COMPLAINT\n===================================\nTICKET CODE: issue_004\nCLASS: Broken Streetlight\nROUTE TO: Electrical Department\n\nEXECUTIVE ADVISORY:\nTotal electric module failure in a highly trafficked Embarcadero waterfront crossing point. High risk of low-visibility accidents.\n\nRECOMMENDED RESPONSE SCHEDULE: Within 48 Hours.`,
+    suggestedAction: "Conduct electrical fuse checkout at segment post B-7. Re-lamp LED illumination panels.",
+    status: "Resolved",
+    createdAt: new Date(Date.now() - 5.0 * 24 * 60 * 60 * 1000).toISOString(), // 5 days ago
+    updatedAt: new Date(Date.now() - 2.0 * 24 * 60 * 60 * 1000).toISOString(),
+    resolutionNotes: "Replaced faulty high-surge capacitor in light cluster breaker. Re-lamp has completed successfully.",
+    resolutionDate: new Date(Date.now() - 2.0 * 24 * 60 * 60 * 1000).toISOString(),
+  },
+  {
+    id: "issue_005",
+    reporterId: "citizen_223",
+    reporterName: "Robert Ford",
+    photoUrl: MOCK_IMAGES["Open Manhole"],
+    latitude: 37.7785,
+    longitude: -122.4056,
+    locationName: "421 Bryant St, San Francisco, CA",
+    description: "The metal cover is half open on the roadway. This is a deadly trap for motorcycles and cars!",
+    category: "Open Manhole",
+    confidenceScore: 0.99,
+    severity: "Critical",
+    severityScore: 98,
+    assignedDepartment: "Road Department",
+    complaintText: `CITYPULSE AUTOMATED COMPLAINT\n===================================\nTICKET CODE: issue_005\nCLASS: Open Manhole\nROUTE TO: Road Department\n\nEXECUTIVE ADVISORY:\nSevere public safety threat. Cast iron sewer manhole lid displaced by dynamic heavy truck flow at 421 Bryant. Complete wheel drop trap on a multi-lane highway.\n\nRECOMMENDED RESPONSE SCHEDULE: IMMEDIATE dispatch under 1 hour.`,
+    suggestedAction: "Position safety barricades and emergency signaling warning lights. Re-seat and secure cast iron lid lock.",
+    status: "Critical",
+    createdAt: new Date(Date.now() - 1 * 60 * 60 * 1000).toISOString(), // 1 hour ago
+    updatedAt: new Date(Date.now() - 1 * 60 * 60 * 1000).toISOString(),
+  }
+];
